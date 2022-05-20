@@ -3,8 +3,6 @@
 import os
 import config
 import re
-
-from ErrorHandler import errorHandler
 from ErrorExtraction import errorMsg
 
 
@@ -20,7 +18,6 @@ def getLastError(sublinelist):
     if len(wrongLineList) > 0:
         line = wrongLineList[-1]
     return line
-
 
 def getErrorLog(linelist):
     "从build log中把error log部分抽取出来"
@@ -38,7 +35,6 @@ def getErrorLog(linelist):
             break
         endLineno += 1
     return isWrongIndicatorFound, linelist[startLineno:endLineno]
-
 
 def extractLastError(lastError):
     "从最后一个error信息中提取信息"
@@ -59,8 +55,7 @@ def extractLastError(lastError):
         isFound = platformVersionFinding(lastError)
         errorInfo1 = errorMsg.platform_version_Msg(isFound)
 
-    elif lastError.__contains__("failed to find Build Tools revision") or lastError.__contains__(
-            "Failed to find Build Tools revision"):
+    elif lastError.__contains__("failed to find Build Tools revision") or lastError.__contains__("Failed to find Build Tools revision"):
         errorMsg.buildtools_revision_question = True
         isFound = buildtoolsRevivionFinding(lastError)
         errorInfo1 = errorMsg.buildtools_version_Msg(isFound)
@@ -96,16 +91,15 @@ def extractLastError(lastError):
         errorInfo1 = errorMsg.dx_found_Msg(isFound)
     return errorInfo1
 
-
 def extractErrorLog(sublinelist):
     "根据error log第一行提取一些信息"
     isFound = 0  # isFound = 0 represent that the extraction failed
     errorInfo2 = {}
     firstline = sublinelist[0]
-    # print(firstline)
+    #print(firstline)
     if (firstline.__contains__("Execution failed for task") or
-            firstline.__contains__("Could not evaluate onlyIf predicate for task") or
-            firstline.__contains__("Could not determine the dependencies of task")):
+          firstline.__contains__("Could not evaluate onlyIf predicate for task") or
+          firstline.__contains__("Could not determine the dependencies of task")):
         errorMsg.task_execution_failed = True
         isFound = extractProjectAndTask(sublinelist)
         errorInfo2 = errorMsg.task_execution_Msg(isFound)
@@ -164,42 +158,39 @@ def extractErrorLog(sublinelist):
         errorInfo2 = errorMsg.jvm_heap_errors_Msg(isFound)
     return errorInfo2
 
-
-def errorMessageExtraction(file):
+def errorMessageExtraction():
     "this function extract the key messages from the build log"
     # print("test1")
 
     extractionStatus = False
     errorInfo = {}
-    f = open(file, 'r')  # open file
+    f = open(config.build_log_name, 'r')  # open file
     linelist = f.readlines()
     f.close()
-    isWrongIndicatorFound, errorLog = getErrorLog(linelist)
+    isWrongIndicatorFound, sublinelist = getErrorLog(linelist)
     isFound = False
     if isWrongIndicatorFound:
-        sublinelist = errorLog  # the sub set of linelist continue from the next line of wrong indicator
-        print("error log:")
-        for line in sublinelist:
-            print(line, end='')
+        #print("error log:")
+        #for line in sublinelist:
+            #print(line,end='')
         errorInfo2 = extractErrorLog(sublinelist)
-        print('errorInfo2 = ', errorInfo2)
+        # print('errorInfo2 = ', errorInfo2)
         errorInfo.update(errorInfo2)
         lastError = getLastError(sublinelist)
         if lastError != None:
-            print('lastError = ' + lastError)
+            # print('lastError = ' + lastError)
             errorInfo1 = extractLastError(lastError)
-            print('errorInfo1 = ', errorInfo1)
+            # print('errorInfo1 = ', errorInfo1)
             errorInfo.update(errorInfo1)
-        else:
-            print("lastError is None")
+        # else:
+            # print("lastError is None")
         if errorInfo != {}:
             isFound = errorInfo['errorFlg']
-            print('errorInfo = ', errorInfo)
+            # print('errorInfo = ', errorInfo)
         if isFound:
             extractionStatus = True
         f.close()
-    return extractionStatus, errorInfo
-
+    return extractionStatus, sublinelist, errorInfo
 
 def dxFileExtraction(lastError):
     isFound = 0
@@ -208,7 +199,6 @@ def dxFileExtraction(lastError):
         isFound = 1
         config.dx_file_path = dxFile
     return isFound
-
 
 def ndkVersionFinding(lastError):
     "从lastError中抽取ndk版本号"
@@ -219,13 +209,11 @@ def ndkVersionFinding(lastError):
         isFound = 1
     return isFound
 
-
 def buildtoolsRevivionFinding(lastError):
     "从lastError中抽取sdk的build tools版本号"
     config.build_tools_revision = lastError.split(" ")[-1]
     isFound = 1
     return 1
-
 
 def platformVersionFinding(lastError):
     "从lastError中抽取platform版本号，例如android-21"
@@ -235,7 +223,6 @@ def platformVersionFinding(lastError):
         config.platform_version = platformVersion.group()[1:-1]
         isFound = 1
     return isFound
-
 
 def connectTimeOut(lastError):
     "仓库连接超时时，抽取仓库地址，用于后续替换该地址"
@@ -276,7 +263,7 @@ def configurationOfTask(sublinelist):
     projectAndTask = re.search("'([^\"]*)'", sublinelist[0], flags=0)
     if projectAndTask != None:
         # print("2")
-        tokens = (projectAndTask.group())[1:-1].split(":")  # 项目名和任务名
+        tokens = (projectAndTask.group())[1:-1].split(":") # 项目名和任务名
         if len(tokens) > 1:
             for token in tokens[0:-1]:
                 if tokens.index(token) > 1:
@@ -291,16 +278,16 @@ def configurationOfTask(sublinelist):
             # print(task_name)
             config.task_name = task_name
         isFound = 1
-    for line in sublinelist[1:]:  # 从第二行开始搜索
+    for line in sublinelist[1:]: #从第二行开始搜索
         if line.__contains__("No value has been specified for property "):
             property = re.search("'([^\"]*)'", line, flags=0)
             if property != None:
                 # print(property.group()[1:-1])
-                property_list.append(property.group()[1:-1])  # property名
+                property_list.append(property.group()[1:-1]) # property名
     if len(property_list) > 1:  # error_log103 出现多个property名，组织成列表
         config.property_list = property_list
         isFound = 2
-    elif len(property_list) == 1:  # 出现一个property名，单独抽取
+    elif len(property_list) == 1: # 出现一个property名，单独抽取
         config.property_name = property_list[0]
         isFound = 3
     return isFound
@@ -319,26 +306,26 @@ def notFoundInRootProject(sublinelist):
 
 def evaluateRootProject(sublinelist):
     isFound = 0
-    project_name = re.search("'([^\"]*)'", sublinelist[0], flags=0)  # 抽取第一行中出现的项目名
+    project_name = re.search("'([^\"]*)'", sublinelist[0], flags=0) # 抽取第一行中出现的项目名
     if project_name != None:
         config.project_name = project_name.group()[1:-1]
         isFound = 1
     if sublinelist[1].__contains__("Could not find property"):  # error_log16 and error_log97 第二行出现的情况之一
         property_name = re.findall("'([^\"\']*)'", sublinelist[1], flags=0)
-        if len(property_name) == 1:  # 只出现一个property
-            config.property_name = property_name[0]  # property名
-            config.property_class = sublinelist[1].split(" ")[-1][:-2]  # property路径
+        if len(property_name) == 1: # 只出现一个property
+            config.property_name = property_name[0] # property名
+            config.property_class = sublinelist[1].split(" ")[-1][:-2] # property路径
             isFound = 2
         elif len(property_name) == 2:
             if sublinelist[1].__contains__("on root project"):
                 config.property_name = property_name[0]
-                config.property_project = property_name[1]  # 没有给出property路径，而是给出property所在的项目
+                config.property_project = property_name[1] # 没有给出property路径，而是给出property所在的项目
                 isFound = 3
             elif sublinelist[1].__contains__("on task"):
                 config.property_name = property_name[0]
-                config.task_name = property_name[1].split(":")[-1]  # 给出property所在的任务
+                config.task_name = property_name[1].split(":")[-1] # 给出property所在的任务
                 isFound = 4
-    elif sublinelist[1].__contains__("No such property"):  # 第二行出现的情况之一
+    elif sublinelist[1].__contains__("No such property"): # 第二行出现的情况之一
         tokens = sublinelist[1].split(": ")
         if len(tokens) > 2:
             config.property_name = tokens[-2].split(" ")[0]
@@ -410,7 +397,7 @@ def extractProjectAndTask(sublinelist):
     task_name = ""
     projectAndTask = re.search("'([^\"]*)'", sublinelist[0], flags=0)
     if projectAndTask != None:
-        # print("2")
+        #print("2")
         tokens = (projectAndTask.group())[1:-1].split(":")
         if len(tokens) > 1:
             for token in tokens[0:-1]:
@@ -578,54 +565,3 @@ def extractDependency(sublinelist):
                 isFound = 9
     return isFound
 
-
-def checkIfBuildSuccess(file):
-    "check if the build process succeed"
-    flg = False
-    f = open(file, 'r')
-    linelist = f.readlines()
-    for line in linelist:  # 依次读取每行
-        line = line.strip()  # 去掉每行头尾空白
-        if line.__contains__(config.success_indicator):  # find success message
-            flg = True
-            break
-    f.close()
-    return flg
-
-def experiment1():
-    buildSuccess = []
-    extractSuccess = []
-    extractFailure = []
-    for id in range(1, 176):
-        file = "/home/wqc/experiment/errorlog/error_log" + str(id) + ".txt"
-        if checkIfBuildSuccess(file):
-            buildSuccess.append(id)
-        else:
-            extractionStatus, errorInfo = errorMessageExtraction(file)
-            if extractionStatus:
-                extractSuccess.append(id)
-            else:
-                extractFailure.append(id)
-    print("build success number = " + str(len(buildSuccess)))
-    buildFailureNum = 175 - len(buildSuccess)
-    print("build failure number = " + str(buildFailureNum))
-    print("extraction success number = " + str(len(extractSuccess)))
-    print("extraction failure number = " + str(len(extractFailure)))
-    print("accuracy = " + str(float(len(extractSuccess)) / float(buildFailureNum)))
-    print("extraction failure id = " + str(extractFailure))
-
-def main():
-    #print("test")
-    file = "/home/wqc/AppAutoBuilder/MySampleDir/app.log"
-    if checkIfBuildSuccess(file):
-        print("build success")
-    else:
-        extractionStatus, errorInfo = errorMessageExtraction(file)
-        if extractionStatus:
-            print(errorInfo)
-            errorHandler.errorHandler(errorInfo)
-
-
-
-if __name__ == "__main__":
-    experiment1()
