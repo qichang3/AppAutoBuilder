@@ -6,13 +6,17 @@ import os
 user_home = os.environ['HOME'] # env user_home
 android_sdk_home = os.environ['ANDROID_HOME']
 sdkmanger_home = os.path.join(android_sdk_home, 'tools/bin/sdkmanager')
-gradle_home = os.path.join(os.environ['GRADLE_HOME'], 'bin')  # you need to set GRADLE_HOME env in /etc/profile
+# gradle_home = os.path.join(os.environ['GRADLE_HOME'], 'bin')  # you need to set GRADLE_HOME env in /etc/profile
 download_path = os.path.join(user_home, 'AppAutoBuilder/MySampleDir')  # project download path
 project_path = os.path.join(user_home, 'AppAutoBuilder')
 gradlew_path = os.path.join(download_path, 'gradlew')  # dir of file gradlew
 settings_gradle_path = os.path.join(download_path,'settings.gradle') # path of settings.gradle
 build_log_name = "app.log" # 记录build log的文件名
 build_gradle_path = os.path.join(download_path, 'build.gradle')  # dir of build.gradle of root project
+
+build_result = os.path.join(download_path, 'result') # 保存构建结果的文件夹
+apk_result = os.path.join(build_result, 'apk')
+errorlog_result = os.path.join(build_result, 'errorLog')
 
 experiment_home = "/home/wqc/experiment/jdk1.8"
 
@@ -45,6 +49,7 @@ report_file_path = "" # 有一种log在发生test失败后会给出报错的文�
 build_tools_revision = "" # 关于sdk的错误，log会给出build tool的版本：failed to find Build Tools revision 19.0.3
 platform_version = "" #本地找不到的sdk版本名
 ndk_version = "" # 本地找不到的ndk版本
+dx_file_path = "" # dx应该所在的路径
 
 artifact_group = "" # 工件
 artifact_name = ""
