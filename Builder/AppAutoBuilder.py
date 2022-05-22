@@ -14,17 +14,22 @@ from ErrorExtraction import errorMsgExtraction
 
 def chooseIfReplaceProject():
     "询问用户是否用新url中的项目替换现有项目"
-    while (True):
+    while True:
         changeflg = input("please input 'yes' or 'no': ")
-        if (changeflg != 'yes' and changeflg != 'no'):
+        if changeflg != 'yes' and changeflg != 'no':
             print("the input is wrong!")
             continue
-        elif (changeflg == "yes"):
-            url = checkIfUrlValid()
+        elif changeflg == "yes":
             os.system('rm -rf ./MySampleDir')
-            print("start downloading")
-            Repo.clone_from(url, to_path=config.download_path)  # clone project from github
-            print("download success")
+            while True:
+                try:
+                    url = checkIfUrlValid()
+                    print("start downloading")
+                    Repo.clone_from(url, to_path=config.download_path)  # clone project from github
+                    print("download success")
+                    break
+                except Exception as err:
+                    print("the url is valid but not a repository!")
             break
         else:
             print("using the existing project as MySampleDir")
@@ -35,8 +40,11 @@ def checkIfUrlValid():
     while True:
         try:
             url = input("Please enter the address of the Project: ").strip() # read url
-            status = urllib.request.urlopen(url).code
-            print(status)
+            headers = {  # 用户代理，伪装浏览器用户访问网址
+                'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3941.4 Safari/537.36'
+            }
+            r = urllib.request.Request(url, headers=headers)
+            urllib.request.urlopen(r)
             return url
         except Exception as err:
             print("the input url is invalid, please try again")
@@ -44,10 +52,15 @@ def checkIfUrlValid():
 def downloadProject():
     # url = checkIfUrlValid()
     if not os.path.exists(config.download_path):  # 项目路径MySampleDir不存在
-        url = checkIfUrlValid()
-        print("start downloading")
-        Repo.clone_from(url, to_path=config.download_path)  # clone project from github
-        print("download success")
+        while True:
+            try:
+                url = checkIfUrlValid()
+                print("start downloading")
+                Repo.clone_from(url, to_path=config.download_path)  # clone project from github
+                print("download success")
+                break
+            except Exception as err:
+                print("the url is valid but not a repository!")
     else:
         print("current project has MySampleDir!")
         print("do you want to replace old project with the new one?")
