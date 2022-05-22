@@ -12,7 +12,7 @@ from ErrorHandler import errorHandler
 from ErrorExtraction import errorMsgExtraction
 
 
-def chooseIfReplaceProject(url):
+def chooseIfReplaceProject():
     "询问用户是否用新url中的项目替换现有项目"
     while (True):
         changeflg = input("please input 'yes' or 'no': ")
@@ -20,6 +20,7 @@ def chooseIfReplaceProject(url):
             print("the input is wrong!")
             continue
         elif (changeflg == "yes"):
+            url = checkIfUrlValid()
             os.system('rm -rf ./MySampleDir')
             print("start downloading")
             Repo.clone_from(url, to_path=config.download_path)  # clone project from github
@@ -34,22 +35,23 @@ def checkIfUrlValid():
     while True:
         try:
             url = input("Please enter the address of the Project: ").strip() # read url
-            urllib.request.urlopen(url)
+            status = urllib.request.urlopen(url).code
+            print(status)
             return url
         except Exception as err:
-            # print(err)
             print("the input url is invalid, please try again")
 
 def downloadProject():
-    url = checkIfUrlValid()
+    # url = checkIfUrlValid()
     if not os.path.exists(config.download_path):  # 项目路径MySampleDir不存在
+        url = checkIfUrlValid()
         print("start downloading")
         Repo.clone_from(url, to_path=config.download_path)  # clone project from github
         print("download success")
     else:
         print("current project has MySampleDir!")
         print("do you want to replace old project with the new one?")
-        chooseIfReplaceProject(url)
+        chooseIfReplaceProject()
     os.chdir(config.download_path)  # move to project root directory to execute gradlew
     os.system('rm -rf ' + config.build_result)
     os.mkdir(config.build_result)
@@ -93,6 +95,7 @@ def appAutoBuilder():
                 break
             f.close()
             flg = flg + 1
+    print("please check the building result in " + config.build_result)
 
 def main():
     print("It is a App-Auto-Builder from NWPU")
