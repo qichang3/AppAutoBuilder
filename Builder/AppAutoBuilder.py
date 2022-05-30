@@ -74,6 +74,18 @@ def downloadProject():
     if os.path.exists(os.path.join(config.download_path, '.gitmodules')):
         os.system("git submodule update --init --recursive")  # 下载子模块
 
+def findAllApk():
+    apk_list = os.popen("find -name '*.apk'").readlines()  # 查找所有以.apk结束的文件
+    if len(apk_list) > 0:
+        print(str(len(apk_list)) + " Apk Generated!")
+        for apk in apk_list:  # 查找成功
+            apk = os.getcwd() + apk[1:-1]
+            os.system('cp ' + apk + ' ' + config.apk_result)
+    else:  # 查找失败
+        print("No Apk Generated!")
+    print("please check the building result in " + config.build_result)
+
+
 def appAutoBuilder():
     print('file gradlew detected')
     flg = 1
@@ -82,13 +94,6 @@ def appAutoBuilder():
         os.system(config.gradlew_path + ' assemble > ' + config.build_log_name + ' 2>&1')
         if buildSuccessCheck.checkIfBuildSuccess():  # 执行成功
             print("assemble Succeed!")
-            apk_list = os.popen("find -name '*.apk'").readlines()  # 查找所有以.apk结束的文件
-            if len(apk_list) > 0:
-                for apk in apk_list:  # 查找成功
-                    apk = os.getcwd() + apk[1:-1]
-                    os.system('cp ' + apk + ' ' + config.apk_result)
-            else:  # 查找失败
-                print("No Apk Generated!")
             break
         else:  # 执行失败
             print("assemble failed!")
@@ -108,7 +113,7 @@ def appAutoBuilder():
                 break
             f.close()
             flg = flg + 1
-    print("please check the building result in " + config.build_result)
+    findAllApk()
 
 def main():
     print("It is a App-Auto-Builder from NWPU")

@@ -75,7 +75,7 @@ def extractLastError(lastError):
         isFound = 1
         errorInfo1 = errorMsg.lint_found_errors_Msg(isFound)
 
-    elif lastError.__contains__("Lint infrastructure error"):
+    elif lastError.__contains__("Lint infrastructure error") or lastError.__contains__("Not enough memory to run compilation"):
         errorMsg.jvm_heap_errors = True
         isFound = 1
         errorInfo1 = errorMsg.jvm_heap_errors_Msg(isFound)

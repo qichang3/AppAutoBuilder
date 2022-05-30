@@ -64,7 +64,7 @@ def javaDocGenerateHandler(errorInfo):
 def jvmHeapHandler():
     file = file = os.path.join(config.download_path, 'gradle.properties') # 问题项目下的gradle.properties路径
     fw = open(file, 'a')
-    fw.write('org.gradle.jvmargs=-Xmx2048m\n')
+    fw.write('org.gradle.jvmargs=-Xmx4096m\n')
     fw.close()
 
 def lintErrorsHandler(errorInfo):
