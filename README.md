@@ -44,6 +44,7 @@ AppAutoBuilder.main()
 ## 输入
 
 您需要根据提示输入所要构建的项目GitHub地址，请确保输入的地址正确无误，例如https://github.com/federicoiosue/Omni-Notes
+
 AppAutoBuilder会将目标项目下载到AppAutoBuilder项目目录下并命名为MySampleDir
 
 
