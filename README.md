@@ -33,7 +33,7 @@ git clone https://github.com/Achilles0321/AppAutoBuilder
 
 ![](https://github.com/Achilles0321/photoForMarkDown/raw/main/AppAutoBuilder/main.png)
 
-或者使用Python命令行，在AppAutoBuilder目录下打开命令行运行如下命令：
+或者使用命令行运行，在AppAutoBuilder目录下打开命令行运行如下命令：
 
 ```shell
 python
